@@ -1,0 +1,37 @@
+header {
+    background: #456268;
+  }
+  
+  .itemNav{
+    color: #d2eaf4;
+    border-bottom: 3px solid #d2eaf4;
+    padding: 10px;
+    text-decoration: none;
+  }
+  
+  header a:hover {
+    color: #d2eaf4;
+    box-shadow: 5px 10px 40px #d2eaf4;
+    transition: all 0.4s;
+  }
+  
+  .logo {
+    width: 100%;
+  }
+  
+  ul button {
+    background-color: #d2eaf4;
+    padding: 5px 5px;
+    margin-right: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-color: #456268;
+    color: #456268;
+    border-radius: 10%;
+  }
+  
+  ul button:hover {
+    background-color: #456268;
+    color: #d2eaf4;
+    transition: all 0.4s;
+  }
