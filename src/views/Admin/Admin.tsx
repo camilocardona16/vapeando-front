@@ -1,9 +1,24 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Producto } from "../../interfaces/Producto";
 import * as services from "../../Services/services";
-import { Modal, Container, Row, Col, Button } from "react-bootstrap";
+import { Modal, Container, Button } from "react-bootstrap";
+import swal from 'sweetalert';
+import {io} from 'socket.io-client';
 
 function Admin() {
+  const socket = io('ws://localhost:8080', {
+    reconnectionDelay: 1000,
+    reconnection: true,
+    transports: ['websocket'],
+    agent: false,
+    upgrade: false,
+    rejectUnauthorized: false
+  });
+  socket.on('hola',(data)=>{
+    console.log('data recivida',data);
+  });
+
+
   let [showCrear, setshowCrear] = useState(false);
   let [showEditar, setshowEditar] = useState(false);
   let [showBorrar, setshowBorrar] = useState(false);
@@ -30,18 +45,39 @@ function Admin() {
     e.preventDefault();
     const res = await services.CrearProductos(seleccionado);
     console.log(res);
+    swal("Agregado", "nuevo producto en el mercado", "success");
+    setshowCrear(false);
     
   };
-  const editar = (e: FormEvent<HTMLFormElement>) => {
+  const editar = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const res = await services.EditarProductos(seleccionado);
     console.log(seleccionado);
+    setshowEditar(false);
   };
   const borrar = (producto: Producto) => {
+    swal({
+      title: "Estas seguro de borrar este producto",
+      icon: "warning",
+      buttons:['cancelar','guardar'],
+      dangerMode: true,
+    })
+    .then(async (willDelete) => {
+      if (willDelete) {
+        const res = await services.BorrarProducto(producto);
+        console.log(res);
+        swal("PProducto Eliminado", {
+          icon: "success",
+        });
+      } else {
+        return ;
+      }
+    });
     console.log(producto);
   };
 
   useEffect(() => {
-    loadProductos();
+    loadProductos();    
   }, []);
   return (
     <>

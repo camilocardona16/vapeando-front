@@ -22,13 +22,13 @@ const Product = ({producto}:Props)=> {
       let prods=JSON.parse(prodsString);
       let esta=false;
       for (let i = 0; i < prods.length; i++) {
-        if(prods[i]._id==producto._id){
+        if(prods[i]._id===producto._id){
           swal({title: "ya esta en el carrito",icon: "info",})
           esta=true;
           break;
         }
       }
-      if(esta==false){
+      if(esta===false){
         prods.push({
           _id:producto._id,
           img:producto.img,
@@ -61,6 +61,7 @@ const Product = ({producto}:Props)=> {
       <>
         <div className="col-md-6 col-lg-4">
           <div className="profile-card-4 text-center">
+          <img src='https://via.placeholder.com/300' className="img img-responsive" alt='imagen'/>
             <div className="profile-content">
             <div className="profile-name">{producto.nombre}</div>
               <div className="row">
@@ -93,7 +94,7 @@ const Product = ({producto}:Props)=> {
             <Container>
               <Row>
                 <Col xs='6' md='6'>
-                  <img src={producto.img} width='100%'/>
+                  <img alt='imagenproducto' src={producto.img} width='100%'/>
                 </Col>
                 <Col xs='6' md='6'>
                   <Row>

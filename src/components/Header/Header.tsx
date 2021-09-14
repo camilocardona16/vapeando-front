@@ -1,4 +1,4 @@
-import React, {useState,useContext} from 'react';
+import React, {useState,useEffect} from 'react';
 import swal from 'sweetalert';
 
 import './Header.css';
@@ -8,6 +8,7 @@ import {Badge} from 'react-bootstrap';
 import { Carrito } from '../../interfaces/carrito';
 import { Usuario } from '../../interfaces/Usuario';
 import { factura } from '../../interfaces/factura';
+import { Producto } from '../../interfaces/Producto';
 
 export default function Header() {
   // controla la apertura y cirrer de modals
@@ -30,15 +31,24 @@ export default function Header() {
   // variable para almacenar mis facturas:
   let[misFac,setMisFac]=useState<factura[]>([]);
 
-  function facturar(){
-    let total=0;
-    let tp=0;
-    for (let i = 0; i < items.length; i++) {
-      total=total+items[i].subtotal;
-      tp=tp+items[i].cantidad;
+  useEffect(() => {
+    facturar();
+  },[setItems])
+
+  async function facturar(){
+    const carrtString =await localStorage.getItem('carrito_vapeando');
+    if(carrtString){
+      let carrt = await JSON.parse(carrtString);
+      setItems(carrt);
+      let total=0;
+      let tp=0;
+      for (let i = 0; i < items.length; i++) {
+        total=total+items[i].subtotal;
+        tp=tp+items[i].cantidad;
+      }
+      setTotalItems(tp);
+      setFactura(total);
     }
-    setTotalItems(tp);
-    setFactura(total);
   }
 
   async function misFacturas(){
@@ -47,7 +57,7 @@ export default function Header() {
   }
 
   function pagarCuenta() {
-    if(autenticado==false){
+    if(autenticado===false){
       return swal({title: "Debes estar autenticado para confirmar la compra",icon: "warning",})
     }
     let usuarioString= localStorage.getItem('usuario_vapeando');
@@ -66,15 +76,24 @@ export default function Header() {
     setItems([]);
   }
 
-  function eliminar(pos:number){
-    let productosString = localStorage.getItem('carrito_vapeando');
+  async function eliminar(item:Carrito){
+    let productosString = await localStorage.getItem('carrito_vapeando');
     if(productosString){
-      const prods=JSON.parse(productosString);
-      setTotalItems(totalItems-(items[pos].cantidad));
-      let news= prods.splice(pos,1)
-      setItems(news);
+      console.log(JSON.parse(productosString));
+      
+      let news= JSON.parse(productosString)
+      let nuevos:Carrito[] =[]; 
+      news.forEach((element:Carrito) => {
+        if(element._id!==item._id){
+          nuevos.push(element)
+        }
+      });
+      console.log(nuevos);
+      
+      setItems(nuevos);
+      localStorage.setItem('carrito_vapeando',JSON.stringify(nuevos));
       setshowCarrito(false);
-      localStorage.setItem('carrito_vapeando',JSON.stringify(news));
+      setTotalItems(totalItems-(item.cantidad));
     }
   }
 
@@ -93,7 +112,7 @@ export default function Header() {
   // })
   // .catch((e) => {
   //   console.log(e);
-  //   if(e.code=='auth/wrong-password'){
+  //   if(e.code==='auth/wrong-password'){
   //     swal({title: "Usuario o contraseña incorrectos",icon: "warning"})
   //   }
   // });
@@ -114,7 +133,7 @@ export default function Header() {
     //   setshowCrear(false);
     //   swal({title: "Usuario registrado correctamente",icon: "success"})
     // }).catch(e=>{
-    //   if(e.code=='auth/email-already-in-use'){
+    //   if(e.code==='auth/email-already-in-use'){
     //     swal({title: "Este usuario ya existe !",icon: "warning"})
     //   }
     // });
@@ -164,7 +183,7 @@ export default function Header() {
         {/* Modal Carrito  */}
         <Modal  show={showCarrito}
                 onHide={()=>{setshowCarrito(false)}}
-                onEnter={()=>{facturar()}}
+                onEnter={async ()=>{await facturar()}}
                 onExit={()=>{setTotalItems(0)}}
                 size="lg"
                 centered>
@@ -181,17 +200,15 @@ export default function Header() {
               </Row>
               {items.length===0? <Row><Badge className='bg-primary text-with'>Agrega productos al carrito</Badge></Row>:null}
               {items.map((item,index)=>{
-                return <>
-                  <Row>
+                return( <Row key={index}> 
                     <Col xs='3' md='3'> <img src={item.img} className="w-100" alt='imgcarrito'></img>
                      {item.nombre}
                     </Col>
                     <Col xs='3' md='3'>{item.precio}</Col>
                     <Col xs='3' md='3'>{item.cantidad}</Col>
-                    <Col xs='3' md='3'>{item.subtotal} <Button variant='danger' onClick={()=>{eliminar(index)}}>X</Button></Col>
+                    <Col xs='3' md='3'>{item.subtotal} <Button variant='danger' onClick={()=>{eliminar(item)}}>X</Button></Col>
                   </Row>
-                </>
-              })}
+              )})}
               
             </Container>
           </Modal.Body>

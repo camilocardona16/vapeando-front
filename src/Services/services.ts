@@ -12,5 +12,8 @@ export const CrearProductos=async (producto:Producto) =>{
 }
 
 export const EditarProductos=async (producto:Producto) =>{
-    return await axios.post(API+'productos',producto);
+    return await axios.put(API+'producto/'+producto._id,producto); 
+}
+export const BorrarProducto=async (producto:Producto) =>{
+    return await axios.delete(API+'producto/'+producto._id);
 }
